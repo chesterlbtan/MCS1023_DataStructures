@@ -30,8 +30,8 @@ class TreeType
 		bool IsEmpty()const;
 		//int NumberOfNodes()const;
         void InsertItem(ItemType);
-        void DeleteItem(ItemType);
-        void RetrieveItem(ItemType&,bool& found);
+        void DeleteItem(const char*);
+        void RetrieveItem(const char*,bool& found);
         void PrintTree();
         
     private:
@@ -39,8 +39,8 @@ class TreeType
         
 		void Destroy(TreeNode*&);
 		void Insert(TreeNode*&,ItemType);
-		void Retrieve(TreeNode* tree, ItemType& item, bool& found);
-		void Delete(TreeNode*&, ItemType);
+		void Retrieve(TreeNode* tree, const char* item, bool& found);
+		void Delete(TreeNode*&, const char*);
 		void Print(TreeNode* tree);
 };
 
@@ -86,59 +86,60 @@ void TreeType::Insert(TreeNode*& tree, ItemType item)
 	    tree->left = NULL;
 		tree->info = item;
     }
-    else if (item.ContactName < tree->info.ContactName)
+    else if(strcmp(item.ContactName, tree->info.ContactName) == -1)
     	Insert(tree->left, item);
     else
     	Insert(tree->right, item);
 }
 
-void TreeType::RetrieveItem(ItemType& item, bool& found)
+void TreeType::RetrieveItem(const char* item, bool& found)
 {
 	Retrieve(root, item, found);
 }
 
-void TreeType::Retrieve(TreeNode* tree, ItemType& item, bool& found)
+void TreeType::Retrieve(TreeNode* tree, const char* name, bool& found)
 {
 	if(tree == NULL)
 		found = false;
-	else if(item.ContactName < tree->info.ContactName)
-		Retrieve(tree->left, item, found);
-	else if(item.ContactName > tree->info.ContactName)
-		Retrieve(tree->right, item, found);
+	else if(strcmp(name, tree->info.ContactName) == -1)
+		Retrieve(tree->left, name, found);
+	else if(strcmp(name, tree->info.ContactName) == 1)
+		Retrieve(tree->right, name, found);
 	else
 		found = true;
 }
 
-//TODO: deleteItem
-void TreeType::DeleteItem(ItemType item)
+void TreeType::DeleteItem(const char* name)
 {
-	Delete(root, item);
+	//cout<<endl<<"deleteitem: "<<name<<endl;
+	Delete(root, name);
 }
 
-void TreeType::Delete(TreeNode*& tree, ItemType item)
+void TreeType::Delete(TreeNode*& tree, const char* name)
 {
 	if(tree != NULL)
 	{
-		if(tree->info.ContactName == item.ContactName)
+		//cout<<endl<<"delete: "<<name<<endl;
+		if(strcmp(name, tree->info.ContactName) == 0)
 		{
 			if(tree->left == NULL && tree->right == NULL)
 			{
-				//std::cout<<"case1"<<"\n";
+				//cout<<"case1"<<"\n";
 				tree = NULL;
 			}
 			else if(tree->left != NULL && tree->right == NULL)
 			{
-				//std::cout<<"case2 takeLEFT"<<"\n";
+				//cout<<"case2 takeLEFT"<<"\n";
 				tree = tree->left;
 			}
 			else if(tree->left == NULL && tree->right != NULL)
 			{
-				//std::cout<<"case2 takeRIGHT"<<"\n";
+				//cout<<"case2 takeRIGHT"<<"\n";
 				tree = tree->right;
 			}
 			else
 			{
-				//std::cout<<"case3"<<"\n";
+				//cout<<"case3"<<"\n";
 				TreeNode* least = tree;
 				ItemType val;
 				least = tree->right;
@@ -146,19 +147,21 @@ void TreeType::Delete(TreeNode*& tree, ItemType item)
 					least = least->left;
 				val = least->info;
 				tree->info = val;
-				Delete(tree->right, val);
+				Delete(tree->right, val.ContactName);
 			}
 		}
-		else if(item.ContactName < tree->info.ContactName)
-			Delete(tree->left, item);
-		else if(item.ContactName > tree->info.ContactName)
-			Delete(tree->right, item);
+		else if(strcmp(name, tree->info.ContactName) == -1)
+			Delete(tree->left, name);
+		else if(strcmp(name, tree->info.ContactName) == 1)
+			Delete(tree->right, name);
 	}
 }
 
 void TreeType::PrintTree()
 {
-	std::cout<<std::setw(20)<<"ContactName"<<std::setw(20)<<"PhoneNumber"<<std::setw(20)<<"EmailAddress\n";
+	cout<<left<<setw(20)<<setfill(' ')<<"ContactName"
+		<<left<<setw(20)<<setfill(' ')<<"PhoneNumber"
+		<<left<<setw(20)<<setfill(' ')<<"EmailAddress"<<endl;
 	Print(root);
 }
 
@@ -167,7 +170,9 @@ void TreeType::Print(TreeNode* tree)
     if (tree != NULL)
     {
 		Print(tree->left);
-		std::cout<<std::setw(20)<<tree->info.ContactName<<std::setw(20)<<tree->info.PhoneNo<<std::setw(20)<<tree->info.EmailAddress<<std::endl;
+		cout<<left<<setw(20)<<setfill(' ')<<tree->info.ContactName
+			<<left<<setw(20)<<setfill(' ')<<tree->info.PhoneNo
+			<<left<<setw(20)<<setfill(' ')<<tree->info.EmailAddress<<endl;
 		Print(tree->right);
     }
 }
@@ -184,7 +189,6 @@ const char cmd_DeleteItem = '2';
 const char cmd_RetrieveItem = '3';
 const char cmd_IsEmpty = '4';
 const char cmd_PrintTree = '5';
-const char cmd_Help = '6';
 
 void PrintIntro();
 
@@ -218,17 +222,23 @@ int main()
 				myTree.InsertItem(newContact);
 				break;
 			case cmd_DeleteItem:
-				std::cout<<"DeleteCmd detected"<<"\n";
-				//myTree.DeleteItem(myParam[0]);
+				std::cout<<"DeleteCmd detected"<<"\n\n";
+				char theName[20];
+				cout<<"ContactName: ";
+				cin>>theName;
+				myTree.DeleteItem(theName);
 				break;
 			case cmd_RetrieveItem:
 				std::cout<<"RetrieveCmd detected"<<"\n";
+				char theName2[20];
+				cout<<"ContactName: ";
+				cin>>theName2;
 				bool itemFound;
-				//myTree.RetrieveItem(myParam[0], itemFound);
-				/*if(itemFound)
-					std::cout<<"item '" << myParam[0] << "' is found."<<"\n";
+				myTree.RetrieveItem(theName2, itemFound);
+				if(itemFound)
+					std::cout<<"item '" << theName2 << "' is found."<<"\n";
 				else
-					std::cout<<"item '" << myParam[0] << "' is NOT found."<<"\n";*/
+					std::cout<<"item '" << theName2 << "' is NOT found."<<"\n";
 				break;
 			case cmd_IsEmpty:
 				std::cout<<"IsEmptyCmd detected"<<"\n";
@@ -242,9 +252,6 @@ int main()
 			case cmd_PrintTree:
 				std::cout<<"PrintTreeCmd detected"<<"\n\n";
 				myTree.PrintTree();
-				break;
-			case cmd_Help:
-				PrintIntro();
 				break;
 			default:
 				std::cout<<"unknown command"<<"\n";
@@ -267,11 +274,8 @@ void PrintIntro()
 	std::cout<<"3  RetrieveItem\n";
 	std::cout<<"4  IsEmpty\n";
 	std::cout<<"5  PrintTree\n";
-	std::cout<<"6  Help\n";
 	std::cout<<"0  Exit\n";
 }
-
-
 
 
 
