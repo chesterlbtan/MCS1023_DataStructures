@@ -17,8 +17,8 @@ class TreeType
         TreeType();
         ~TreeType();
 
-		bool IsEmpty()const;
-		//int NumberOfNodes()const;
+	bool IsEmpty()const;
+	//int NumberOfNodes()const;
         void InsertItem(ItemType);
         void DeleteItem(ItemType);
         void RetrieveItem(ItemType&,bool& found);
@@ -27,16 +27,16 @@ class TreeType
     private:
         TreeNode* root;
         
-		void Destroy(TreeNode*&);
-		void Insert(TreeNode*&,ItemType);
-		void Retrieve(TreeNode* tree, ItemType& item, bool& found);
-		//delete
-		void Print(TreeNode* tree);
+	void Destroy(TreeNode*&);
+	void Insert(TreeNode*&,ItemType);
+	void Retrieve(TreeNode* tree, ItemType& item, bool& found);
+	void Delete(TreeNode*&, ItemType);
+	void Print(TreeNode* tree);
 };
 
 TreeType::TreeType()
 {
-   root = NULL;
+	root = NULL;
 }
 
 TreeType::~TreeType()
@@ -70,12 +70,11 @@ void TreeType::InsertItem(ItemType item)
 void TreeType::Insert(TreeNode*& tree, ItemType item)
 {
     if (tree == NULL)
-    { // base case
+    {
     	tree = new TreeNode;
     	tree->right = NULL;
-	    tree->left = NULL;
-		tree->info = item;
-    	//std::cout<<ID<<item<<"\n";
+	tree->left = NULL;
+	tree->info = item;
     }
     else if (item < tree->info)
     	Insert(tree->left, item);
@@ -101,6 +100,51 @@ void TreeType::Retrieve(TreeNode* tree, ItemType& item, bool& found)
 }
 
 //TODO: deleteItem
+void TreeType::DeleteItem(ItemType item)
+{
+	Delete(root, item);
+}
+
+void TreeType::Delete(TreeNode*& tree, ItemType item)
+{
+	if(tree != NULL)
+	{
+		if(tree->info == item)
+		{
+			if(tree->left == NULL && tree->right == NULL)
+			{
+				//std::cout<<"case1"<<"\n";
+				tree = NULL;
+			}
+			else if(tree->left != NULL && tree->right == NULL)
+			{
+				//std::cout<<"case2 takeLEFT"<<"\n";
+				tree = tree->left;
+			}
+			else if(tree->left == NULL && tree->right != NULL)
+			{
+				//std::cout<<"case2 takeRIGHT"<<"\n";
+				tree = tree->right;
+			}
+			else
+			{
+				//std::cout<<"case3"<<"\n";
+				TreeNode* least = tree;
+				ItemType val;
+				least = tree->right;
+				while(least->left != NULL)
+					least = least->left;
+				val = least->info;
+				tree->info = val;
+				Delete(tree->right, val);
+			}
+		}
+		else if(item < tree->info)
+			Delete(tree->left, item);
+		else if(item > tree->info)
+			Delete(tree->right, item);
+	}
+}
 
 void TreeType::PrintTree()
 {
@@ -111,10 +155,8 @@ void TreeType::Print(TreeNode* tree)
 {
     if (tree != NULL)
     {
-		//std::cout<<"L";
 		Print(tree->left);
 		std::cout<<tree->info;
-		//std::cout<<"R";
 		Print(tree->right);
     }
 }
@@ -141,19 +183,21 @@ void ClearChar(char* args);
 
 int main()
 {
-	PrintIntro();
-	
-    TreeType myTree;
+	TreeType myTree;
 	int asd = 0;
 	char myinput[100];
 	char myParam[100];
 	char cmdString[100];
 	int retInt;
+	
 	do
 	{
 		//clean up the variables
 		ClearChar(cmdString);
 		ClearChar(myParam);
+		
+		system("cls");
+		PrintIntro();
 		
 		std::cout<<"\n>>";
 		std::cin>>myinput;
@@ -175,6 +219,7 @@ int main()
 				break;
 			case cmd_DeleteItem:
 				std::cout<<"DeleteCmd detected"<<"\n";
+				myTree.DeleteItem(myParam[0]);
 				break;
 			case cmd_RetrieveItem:
 				std::cout<<"RetrieveCmd detected"<<"\n";
@@ -207,6 +252,7 @@ int main()
 		}
 		
 		std::cout<<"\n";
+		getch();
 	}while(strcmp(myinput, "exit") != 0);
 	
     return 0;
@@ -275,13 +321,3 @@ void ClearChar(char* args)
 	char* end = begin + sizeof(args);
 	std::fill(begin, end, 0);
 }
-
-
-
-
-
-
-
-
-
-
