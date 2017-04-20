@@ -106,7 +106,12 @@ void TreeType::Retrieve(TreeNode* tree, const char* name, bool& found)
 	else if(strcmp(name, tree->info.ContactName) == 1)
 		Retrieve(tree->right, name, found);
 	else
+	{
 		found = true;
+		cout<<left<<setw(15)<<setfill(' ')<<"ContactName"<<": "<<tree->info.ContactName<<endl
+			<<left<<setw(15)<<setfill(' ')<<"Phone Number"<<": "<<tree->info.PhoneNo<<endl
+			<<left<<setw(15)<<setfill(' ')<<"Email Address"<<": "<<tree->info.EmailAddress<<endl;
+	}
 }
 
 void TreeType::DeleteItem(const char* name)
@@ -276,6 +281,8 @@ void PrintIntro()
 	std::cout<<"5  PrintTree\n";
 	std::cout<<"0  Exit\n";
 }
+
+
 
 
 
